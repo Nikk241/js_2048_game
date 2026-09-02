@@ -5,64 +5,262 @@
  * Now it has a basic structure, that is needed for testing.
  * Feel free to add more props and methods if needed.
  */
-class Game {
-  /**
-   * Creates a new game instance.
-   *
-   * @param {number[][]} initialState
-   * The initial state of the board.
-   * @default
-   * [[0, 0, 0, 0],
-   *  [0, 0, 0, 0],
-   *  [0, 0, 0, 0],
-   *  [0, 0, 0, 0]]
-   *
-   * If passed, the board will be initialized with the provided
-   * initial state.
-   */
-  constructor(initialState) {
-    // eslint-disable-next-line no-console
-    console.log(initialState);
+export default class Game {
+  constructor(
+    initialState = [
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+    ],
+  ) {
+    this.score = 0;
+    this.status = 'idle';
+    this.board = initialState;
+    this.initialState = initialState.map((row) => [...row]);
+    /**  we are copying and setting intialState for
+     *  element with this class to further use,
+     *  take a note we wrote ...rows for full copy of an array
+     *  without it we risked to get only
+     *  a link to the array, so actions outside of function that changed array
+     *  can influence over inside variable(witch we dont want)
+     *  WE USE initialState for trmplate after restarting the game
+     */
+
+    this.board = initialState.map((row) => [...row]);
+    /** Everything here is as described above, but the board serves
+     *  as a guide for placing the components
+     */
   }
 
-  moveLeft() {}
-  moveRight() {}
-  moveUp() {}
-  moveDown() {}
+  moveLeft() {
+    this.applyMove(() => this.slideLeft());
+  }
+  moveRight() {
+    this.applyMove(() => this.slideRight());
+  }
+  moveUp() {
+    this.applyMove(() => this.slideUp());
+  }
+  moveDown() {
+    this.applyMove(() => this.slideDown());
+  }
 
-  /**
-   * @returns {number}
-   */
-  getScore() {}
+  getScore() {
+    return this.score;
+  }
 
-  /**
-   * @returns {number[][]}
-   */
-  getState() {}
+  getState() {
+    return this.board.map((row) => [...row]);
+  }
 
-  /**
-   * Returns the current game status.
-   *
-   * @returns {string} One of: 'idle', 'playing', 'win', 'lose'
-   *
-   * `idle` - the game has not started yet (the initial state);
-   * `playing` - the game is in progress;
-   * `win` - the game is won;
-   * `lose` - the game is lost
-   */
-  getStatus() {}
+  getStatus() {
+    return this.status;
+  }
 
-  /**
-   * Starts the game.
-   */
-  start() {}
+  start() {
+    this.status = 'playing';
+    this.addTiles();
+    this.addTiles();
+    this.updateStatus();
+  }
 
-  /**
-   * Resets the game.
-   */
-  restart() {}
+  restart() {
+    this.board = this.initialState.map((row) => [...row]);
+    this.score = 0;
+    this.status = 'idle';
+  }
 
-  // Add your own methods here
+  filterZero(row) {
+    return row.filter((el) => el !== 0);
+  }
+
+  slide(row) {
+    row = this.filterZero(row);
+
+    let scoreGained = 0;
+
+    for (let i = 0; i < row.length; i++) {
+      if (row[i] === row[i + 1]) {
+        row[i] *= 2;
+        scoreGained += row[i];
+        row[i + 1] = 0;
+      }
+    }
+
+    row = this.filterZero(row);
+
+    while (row.length < 4) {
+      row.push(0);
+    }
+
+    return { row, scoreGained };
+  }
+
+  slideLeft() {
+    let totalScore = 0;
+
+    for (let r = 0; r < 4; r++) {
+      const result = this.slide(this.board[r]);
+      const row = result.row;
+      const scoreGained = result.scoreGained;
+
+      this.board[r] = row;
+      totalScore += scoreGained;
+    }
+
+    return totalScore;
+  }
+
+  // This is a method that shifts the entire 4×4 board to the left: it takes
+  // each row separately, applies `slide()` to it
+  // and calculates the total score for the entire move.
+
+  slideRight() {
+    let totalScore = 0;
+
+    for (let r = 0; r < 4; r++) {
+      const result = this.slide(this.board[r].reverse());
+      const row = result.row;
+      const scoreGained = result.scoreGained;
+
+      row.reverse();
+      this.board[r] = row;
+      totalScore += scoreGained;
+    }
+
+    return totalScore;
+  }
+
+  slideUp() {
+    let totalScore = 0;
+
+    for (let c = 0; c < 4; c++) {
+      const columnArray = [
+        this.board[0][c],
+        this.board[1][c],
+        this.board[2][c],
+        this.board[3][c],
+      ];
+
+      const result = this.slide(columnArray);
+
+      for (let r = 0; r < 4; r++) {
+        this.board[r][c] = result.row[r];
+      }
+
+      totalScore += result.scoreGained;
+    }
+
+    return totalScore;
+  }
+
+  slideDown() {
+    let totalScore = 0;
+
+    for (let c = 0; c < 4; c++) {
+      const columnArray = [
+        this.board[0][c],
+        this.board[1][c],
+        this.board[2][c],
+        this.board[3][c],
+      ];
+
+      const result = this.slide(columnArray.reverse());
+
+      result.row.reverse();
+
+      for (let r = 0; r < 4; r++) {
+        this.board[r][c] = result.row[r];
+      }
+
+      totalScore += result.scoreGained;
+    }
+
+    return totalScore;
+  }
+
+  hasEmptyTile() {
+    return this.board.some((row) => row.some((cell) => cell === 0));
+  }
+
+  hasMergeAvailable() {
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 3; c++) {
+        if (this.board[r][c] === this.board[r][c + 1]) {
+          return true;
+        }
+      }
+    }
+
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 4; c++) {
+        if (this.board[r][c] === this.board[r + 1][c]) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  addTiles() {
+    if (!this.hasEmptyTile()) {
+      return;
+    }
+
+    let found = false;
+
+    while (!found) {
+      const r = Math.floor(Math.random() * 4);
+      const c = Math.floor(Math.random() * 4);
+
+      if (this.board[r][c] === 0) {
+        this.board[r][c] = Math.random() < 0.1 ? 4 : 2;
+        found = true;
+      }
+    }
+  }
+
+  applyMove(slideFn) {
+    if (this.status !== 'playing') {
+      return;
+    }
+
+    const arrayBefore = this.board.map((row) => [...row]);
+
+    const scoreGained = slideFn();
+
+    if (this.boardsAreEqual(arrayBefore, this.board)) {
+      return;
+    }
+
+    this.score += scoreGained;
+    this.addTiles();
+    this.updateStatus();
+  }
+
+  boardsAreEqual(boardA, boardB) {
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 4; c++) {
+        if (boardA[r][c] !== boardB[r][c]) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  updateStatus() {
+    if (this.board.some((row) => row.includes(2048))) {
+      this.status = 'win';
+
+      return;
+    }
+
+    if (!this.hasEmptyTile() && !this.hasMergeAvailable()) {
+      this.status = 'lose';
+    }
+  }
 }
-
-module.exports = Game;
