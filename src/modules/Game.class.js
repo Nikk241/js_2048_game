@@ -76,25 +76,25 @@ export default class Game {
   }
 
   slide(row) {
-    row = this.filterZero(row);
+    let cells = this.filterZero(row);
 
     let scoreGained = 0;
 
-    for (let i = 0; i < row.length; i++) {
-      if (row[i] === row[i + 1]) {
-        row[i] *= 2;
-        scoreGained += row[i];
-        row[i + 1] = 0;
+    for (let i = 0; i < cells.length; i++) {
+      if (cells[i] === cells[i + 1]) {
+        cells[i] *= 2;
+        scoreGained += cells[i];
+        cells[i + 1] = 0;
       }
     }
 
-    row = this.filterZero(row);
+    cells = this.filterZero(cells);
 
-    while (row.length < 4) {
-      row.push(0);
+    while (cells.length < 4) {
+      cells.push(0);
     }
 
-    return { row, scoreGained };
+    return { row: cells, scoreGained };
   }
 
   slideLeft() {
