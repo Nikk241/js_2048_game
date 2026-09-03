@@ -1,10 +1,4 @@
 'use strict';
-
-/**
- * This class represents the game.
- * Now it has a basic structure, that is needed for testing.
- * Feel free to add more props and methods if needed.
- */
 export default class Game {
   constructor(
     initialState = [
@@ -18,19 +12,8 @@ export default class Game {
     this.status = 'idle';
     this.board = initialState;
     this.initialState = initialState.map((row) => [...row]);
-    /**  we are copying and setting intialState for
-     *  element with this class to further use,
-     *  take a note we wrote ...rows for full copy of an array
-     *  without it we risked to get only
-     *  a link to the array, so actions outside of function that changed array
-     *  can influence over inside variable(witch we dont want)
-     *  WE USE initialState for trmplate after restarting the game
-     */
 
     this.board = initialState.map((row) => [...row]);
-    /** Everything here is as described above, but the board serves
-     *  as a guide for placing the components
-     */
   }
 
   moveLeft() {
@@ -111,10 +94,6 @@ export default class Game {
 
     return totalScore;
   }
-
-  // This is a method that shifts the entire 4×4 board to the left: it takes
-  // each row separately, applies `slide()` to it
-  // and calculates the total score for the entire move.
 
   slideRight() {
     let totalScore = 0;

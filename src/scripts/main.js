@@ -54,14 +54,22 @@ function render() {
 }
 
 document.addEventListener('keydown', (ev) => {
-  if (ev.key === 'ArrowLeft') {
-    game.moveLeft();
-  } else if (ev.key === 'ArrowRight') {
-    game.moveRight();
-  } else if (ev.key === 'ArrowUp') {
-    game.moveUp();
-  } else if (ev.key === 'ArrowDown') {
-    game.moveDown();
+  switch (ev.key) {
+    case 'ArrowLeft':
+      game.moveLeft();
+      break;
+
+    case 'ArrowRight':
+      game.moveRight();
+      break;
+
+    case 'ArrowUp':
+      game.moveUp();
+      break;
+
+    case 'ArrowDown':
+      game.moveUp();
+      break;
   }
 
   ev.preventDefault();
