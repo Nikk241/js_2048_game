@@ -68,7 +68,7 @@ document.addEventListener('keydown', (ev) => {
       break;
 
     case 'ArrowDown':
-      game.moveUp();
+      game.moveDown();
       break;
   }
 
